@@ -1,0 +1,1 @@
+python run_longExp.py --is_training 1 --train_only False --model_id test --model Transformer --data custom --root_path ./data/ETT/ --data_path uv.csv --freq t --seq_len 36 --label_len 24 --pred_len 12 --enc_in 34 --dec_in 34 --c_out 34
