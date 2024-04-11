@@ -1,131 +1,156 @@
-# Are Transformers Effective for Time Series Forecasting? (AAAI 2023)
-
-This repo is the official Pytorch implementation of LTSF-Linear: "[Are Transformers Effective for Time Series Forecasting?](https://arxiv.org/pdf/2205.13504.pdf)". 
+# 基于Transformer的风速风向短期预测研究（本科毕业设计）
 
 
-## Updates
-- [2022/11/23] Accepted to AAAI 2023 with three strong accept! We also release a **[benchmark for long-term time series forecasting](LTSF-Benchmark.md)** for further research.
-- [2022/08/25] We update our [paper](https://arxiv.org/pdf/2205.13504.pdf) with comprehensive analyses on why existing LTSF-Transformers do not work well on the LTSF problem!
-- [2022/08/25] Besides DLinear, we're exicted to add two Linear models to the paper and this repo. Now we have a LTSF-Linear family!
-  - Linear: Just one linear layer.
-  - DLinear: Decomposition Linear to handle data with trend and seasonality patterns.
-  - NLinear: A Normalized Linear to deal with train-test set distribution shifts. See section 'LTSF-Linear' for more details. 
-
-- [2022/08/25] We update some scripts of LTSF-Linear. 
-  - Linear, NLinear, and DLinear use the same scripts.
-  - Some results of DLinear are slightly different now.
+本项目立足于综合当前深度学习的发展进程和综合分析不同的短期预测模型，在风速风向短期预测上考虑多高度风力信息，提高风向预测精度，有利于加强风能预测，提高风电利用的效率和可靠性，评估各经典深度学习模型在实际情况下预测能力和效果，为风电行业的短期数据预测提供新的参考，对跨海桥梁建设和运营等其他领域提供有价值的见解。
 
 
+## 特点
+- [x] 使用基于Lidar的数据提供了高时空分辨率，精度和可靠性的风测量，使其适用于风力发电预测与风电场运营管理。
+- [x] 该方法包括基于向量分解、风向损失计算和风向数据特征重构，可以有效地处理与0°或360°风向不连续相关的问题。
+- [x] 在多步预测和风速和风向的单高度和多高度场景下，对四种主流深度学习模型的预测性能进行了检验和比较。
 
-## Features
-- [x] Add a [benchmark](LTSF-Benchmark.md) for long-term time series forecasting.
-- [x] Support both [Univariate](https://github.com/cure-lab/DLinear/tree/main/scripts/EXP-LongForecasting/DLinear/univariate) and [Multivariate](https://github.com/cure-lab/DLinear/tree/main/scripts/EXP-LongForecasting/DLinear) long-term time series forecasting.
-- [x] Support visualization of weights.
-- [x] Support scripts on different [look-back window size](https://github.com/cure-lab/DLinear/tree/main/scripts/EXP-LookBackWindow).
-
-Beside LTSF-Linear, we provide five significant forecasting Transformers to re-implement the results in the paper.
-- [x] [Transformer](https://arxiv.org/abs/1706.03762) (NeuIPS 2017)
+本次的项目代码和模型来源参考以下文章
+- [x] [LTSF-Linear](https://arxiv.org/pdf/2205.13504.pdf)(AAAI 2023)
 - [x] [Informer](https://arxiv.org/abs/2012.07436) (AAAI 2021 Best paper)
-- [x] [Autoformer](https://arxiv.org/abs/2106.13008) (NeuIPS 2021)
-- [x] [Pyraformer](https://openreview.net/pdf?id=0EXmFzUn5I) (ICLR 2022 Oral)
-- [x] [FEDformer](https://arxiv.org/abs/2201.12740) (ICML 2022)
+- [x] [Transformer](https://arxiv.org/abs/1706.03762) (NeuIPS 2017)
+- [x] [ConvLSTM](https://arxiv.org/pdf/1506.04214.pdf)
+- [x] [LSTM]
 
 
-## Detailed Description
-We provide all experiment script files in `./scripts`:
-| Files      |                              Interpretation                          |
+
+## 详细说明
+提供以下所有实验脚本文件
+| 文件      |                              解释                          |
 | ------------- | -------------------------------------------------------| 
-| EXP-LongForecasting      | Long-term Time Series Forecasting Task                    |
-| EXP-LookBackWindow      | Study the impact of different look-back window sizes   | 
-| EXP-Embedding        | Study the effects of different embedding strategies      |
+| LSTM_v1.py      | LSTM模型实现                    |
+| ConvLSTM_v1.py      | ConvLSTM模型实现   | 
+| run_longExp.py        | Transformer和Informer模型入口      |
+| 运行命令.txt        | run_longExp.py运行所需的命令      |
+| error_result.py        | 保存模型运行误差效果      | 
+| resultfig.py        | 展示模型运行的误差效果图      |
 
 
-This code is simply built on the code base of Autoformer. We appreciate the following GitHub repos a lot for their valuable code base or datasets:
+此代码只是建立在LTSF-Linear的代码库之上，非常感谢以下 GitHub 存储库的宝贵代码库或数据集：
 
-The implementation of Autoformer, Informer, Transformer is from https://github.com/thuml/Autoformer
+LTSF-Linear来自https://github.com/cure-lab/LTSF-Linear
 
-The implementation of FEDformer is from https://github.com/MAZiqing/FEDformer
+## wind-orient-prediction
+### 技术路线
+![image](pic/tech.png)
 
-The implementation of Pyraformer is from https://github.com/alipay/Pyraformer
+### 向量分解
 
-## LTSF-Linear
-### LTSF-Linear family
-![image](pics/Linear.png)
-LTSF-Linear is a set of linear models. 
-- Linear: It is just a one-layer linear model, but it outperforms Transformers.
-- NLinear: **To boost the performance of Linear when there is a distribution shift in the dataset**, NLinear first subtracts the input by the last value of the sequence. Then, the input goes through a linear layer, and the subtracted part is added back before making the final prediction. The subtraction and addition in NLinear are a simple normalization for the input sequence.
-- DLinear: It is a combination of a Decomposition scheme used in Autoformer and FEDformer with linear layers. It first decomposes a raw data input into a trend component by a moving average kernel and a remainder (seasonal) component. Then, two one-layer linear layers are applied to each component and we sum up the two features to get the final prediction. By explicitly handling trend, **DLinear enhances the performance of a vanilla linear when there is a clear trend in the data.** 
+![image](pic/des.svg)
 
-Although LTSF-Linear is simple, it has some compelling characteristics:
-- An O(1) maximum signal traversing path length: The shorter the path, the better the dependencies are captured, making LTSF-Linear capable of capturing both short-range and long-range temporal relations.
-- High-efficiency: As each branch has only one linear layer, it costs much lower memory and fewer parameters and has a faster inference speed than existing Transformers.
-- Interpretability: After training, we can visualize weights to have some insights on the predicted values.
-- Easy-to-use: LTSF-Linear can be obtained easily without tuning model hyper-parameters.
+### 风向损失计算
 
-### Comparison with Transformers
-Univariate Forecasting:
-![image](pics/Uni-results.png)
-Multivariate Forecasting:
-![image](pics/Mul-results.png)
-LTSF-Linear outperforms all transformer-based methods by a large margin.
+![image](pic/oes.svg)
 
-### Efficiency
-![image](pics/efficiency.png)
-Comparison of method efficiency with Look-back window size 96 and Forecasting steps 720 on Electricity. MACs are the number of multiply-accumulate operations. We use DLinear for comparison, since it has the double cost in LTSF-Linear. The inference time averages 5 runs.
+### 风向数据特征重构
 
-## Getting Started
-### Environment Requirements
+![image](pic/restruct.svg)
 
-First, please make sure you have installed Conda. Then, our environment can be installed by:
+### 时间序列数据集生成
+
+![image](pic/ts.svg)
+
+### 4个模型之间的比较情况
+#### 单高度预测：
+<style>
+  table {
+    border-collapse: collapse;
+    margin: 0 auto; /* 中心对齐 */
+  }
+  td {
+    padding: 0;
+    border: none; /* 去掉边框 */
+  }
+  img {
+    display: block;
+    margin: 0 auto; /* 图片居中对齐 */
+  }
+</style>
+
+<table>
+  <tr>
+    <td>
+      <img src="pic/AE.png" alt="单高度风速损失计算 - 图A">
+    </td>
+    <td>
+      <img src="pic/VE.png" alt="单高度风向损失计算 - 图B">
+    </td>
+  </tr>
+</table>
+
+#### 多高度预测：
+
+<table>
+  <tr>
+    <td style="text-align: center;">
+      17层风速损失
+    </td>
+    <td style="text-align: center;">
+      17层风向损失
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="pic/17AE.png" alt="多高度风速损失计算 - 图A">
+    </td>
+    <td>
+      <img src="pic/17VE.png" alt="多高度风向损失计算 - 图B">
+    </td>
+  </tr>
+</table>
+
+#### 多高度多步预测：
+
+<table>
+  <tr>
+    <td>
+      <img src="pic/12dAE.png" alt="多高度多步风速损失计算 - 图A">
+    </td>
+    <td>
+      <img src="pic/12dVE.png" alt="多高度多步风向损失计算 - 图B">
+    </td>
+  </tr>
+</table>
+
+
+
+## 开始
+### 环境要求
+
+首先，请确保您已安装 Conda。然后，我们的环境可以通过以下方式安装：
 ```
 conda create -n LTSF_Linear python=3.6.9
 conda activate LTSF_Linear
 pip install -r requirements.txt
 ```
 
-### Data Preparation
+### 数据准备
 
-You can obtain all the nine benchmarks from [Google Drive](https://drive.google.com/drive/folders/1ZOYpTUa82_jCcxIdTmyr0LXQfvaM9vIy) provided in Autoformer. All the datasets are well pre-processed and can be used easily.
+本文提供本次实验已经预处理好的数据，**已经在 `./data/ETT` 目录下**，更多数据的预处理情况参考论文内容。
 
-```
-mkdir dataset
-```
-**Please put them in the `./dataset` directory**
+### 训练实例
+- 需要训练LSTM或者ConvLSTM，直接运行`LSTM.py`或者`ConvLSTM.py`
+- 需要训练Transformer或者Informer，直接复制`运行命令.txt`，自行修改参数，在当前目录下运行即可。
 
-### Training Example
-- In `scripts/ `, we provide the model implementation *Dlinear/Autoformer/Informer/Transformer*
-- In `FEDformer/scripts/`, we provide the *FEDformer* implementation
-- In `Pyraformer/scripts/`, we provide the *Pyraformer* implementation
+### 训练情况提示
+- 训练LSTM或者ConvLSTM，需要的时间在30分钟到1小时（GPU条件下）
+- 训练Transformer或者Informer，需要的时间在1小时左右（GPU条件下）
 
-For example:
 
-To train the **LTSF-Linear** on **Exchange-Rate dataset**, you can use the scipt `scripts/EXP-LongForecasting/Linear/exchange_rate.sh`:
-```
-sh scripts/EXP-LongForecasting/Linear/exchange_rate.sh
-```
-It will start to train DLinear by default, the results will be shown in `logs/LongForecasting`. You can specify the name of the model in the script. (Linear, DLinear, NLinear)
+## 引用
 
-All scripts about using LTSF-Linear on long forecasting task is in `scripts/EXP-LongForecasting/Linear/`, you can run them in a similar way. The default look-back window in scripts is 336, LTSF-Linear generally achieves better results with longer look-back window as dicussed in the paper. 
-
-Scripts about look-back window size and long forecasting of FEDformer and Pyraformer is in `FEDformer/scripts` and `Pyraformer/scripts`, respectively. To run them, you need to first `cd FEDformer` or `cd Pyraformer`. Then, you can use sh to run them in a similar way. Logs will store in `logs/`.
-
-Each experiment in `scripts/EXP-LongForecasting/Linear/` takes 5min-20min. For other Transformer scripts, since we put all related experiments in one script file, directly running them will take 8 hours-1 day. You can keep the experiments you interested in and comment out the others. 
-
-### Weights Visualization
-As shown in our paper, the weights of LTSF-Linear can reveal some charateristic of the data, i.e., the periodicity. As an example, we provide the weight visualization of DLinear in `weight_plot.py`. To run the visualization, you need to input the model path (model_name) of DLinear (the model directory in `./checkpoint` by default). To obtain smooth and clear patterns, you can use the initialization we provided in the file of linear models.  
-
-![image](pics/Visualization_DLinear.png)
-## Citing
-
-If you find this repository useful for your work, please consider citing it as follows:
-
+如果您发现此存储库对您的工作有用，请考虑按如下方式引用它：
 ```bibtex
-@inproceedings{Zeng2022AreTE,
-  title={Are Transformers Effective for Time Series Forecasting?},
-  author={Ailing Zeng and Muxi Chen and Lei Zhang and Qiang Xu},
-  journal={Proceedings of the AAAI Conference on Artificial Intelligence},
-  year={2023}
+@inproceedings{
+  title={基于Transformer的风速风向短期预测研究},
+  author={ZhiQing Gan},
+  journal={本科毕业论文},
+  year={2024}
 }
 ```
 
-Please remember to cite all the datasets and compared methods if you use them in your experiments.
+如果您在实验中使用所有数据集和比较方法，请记住引用它们。
