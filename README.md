@@ -123,8 +123,8 @@ LTSF-Linear来自https://github.com/cure-lab/LTSF-Linear
 
 首先，请确保您已安装 Conda。然后，我们的环境可以通过以下方式安装：
 ```
-conda create -n LTSF_Linear python=3.6.9
-conda activate LTSF_Linear
+conda create -n wop python=3.6.9
+conda activate wop
 pip install -r requirements.txt
 ```
 
